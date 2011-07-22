@@ -9,8 +9,12 @@
 
 // A deferred is a value that can be resolved at a later time.
 // The value can be observed via the promise object
-function Deferred()
+function Deferred(onDone)
 {
+  onDone = onDone || function () {};
+  if (typeof onDone !== "function")
+    throw new Error("First argument is not a function");
+
   var value = undefined;
   var isDone = false;
   var doneCallbacks = [];
@@ -23,7 +27,9 @@ function Deferred()
 
     doneCallbacks.push(cb);
 
-    var l = new Listener()
+    var stop = onDone() || function () {};
+
+    var l = new Listener();
     l.stop = function ()
     {
       if (!doneCallbacks) return;
@@ -31,6 +37,8 @@ function Deferred()
       var ix = doneCallbacks.indexOf(cb);
       if (ix > -1)
         doneCallbacks.splice(ix, 1);
+
+      stop();
     }
     l.toString = function ()
     {
@@ -135,22 +143,28 @@ Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
   if (!(pa instanceof Promise))
     throw new Error("Second argument is not a Promise");
 
-  var d = new Deferred();
-
-  pa.onDone(function (val)
+  var d = new Deferred(function ()
   {
-    var x;
-    try
+    var l = pa.onDone(function (val)
     {
-      x = f(val);
-    }
-    catch (_)
-    {
-      // Promises don't have support for exceptions, yet
-      return;
-    }
+      var x;
+      try
+      {
+        x = f(val);
+      }
+      catch (_)
+      {
+        // Promises don't have support for exceptions, yet
+        return;
+      }
 
-    d.done(x);
+      d.done(x);
+    });
+
+    return function ()
+    {
+      l.stop();
+    };
   });
 
   var p = d.promise();
