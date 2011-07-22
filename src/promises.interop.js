@@ -36,3 +36,21 @@ Promise.create = function (f) // (() -> a) -> Promise a
   return p;
 };
 
+Promise.wait = function (ms) // Int -> Promise ()
+{
+  var d = new Deferred();
+
+  setTimeout(function ()
+  {
+    d.done();
+  }, ms);
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return "Promise.wait(ms)";
+  };
+
+  return p;
+};
+
