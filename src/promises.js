@@ -109,11 +109,37 @@ Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
   return p;
 }
 
+Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
+{
+  if (!(pa instanceof Promise))
+    throw new Error("First argument is not a Promise");
+
+  var d = new Deferred();
+
+  pp.onDone(function (pa)
+  {
+    pa.onDone(d.done);
+  });
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return pp.toString() + ".flatten()";
+  };
+
+  return d.promise();
+}
+
 // For convenience, functions as methods
 Promise.prototype = {
   map: function (f)
   {
     return Promise.map(f, this);
+  },
+
+  flatten: function ()
+  {
+    return Promise.flatten(this);
   }
 };
 
