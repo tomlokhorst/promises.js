@@ -317,6 +317,42 @@ Promise.any = function (ps) // [Promise a] -> Promise a
   return p;
 }
 
+Promise.all = function (ps) // [Promise a] -> Promise [a]
+{
+  var d = new Deferred(function ()
+  {
+    var vals = [];
+    var nrDone = 0;
+
+    var listeners = [];
+    var f = function (ix, val)
+    {
+      vals[ix] = val;
+      nrDone++;
+
+      if (ps.length == nrDone)
+        d.done(vals);
+    };
+
+    for (var i = 0, l = ps.length; i < l; i++)
+      listeners[i] = ps[i].onDone(f.bind(null, i));
+
+    return function ()
+    {
+      for (var i = 0, l = listeners.length; i < l; i++)
+        listeners[i].stop();
+    }
+  });
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return "Promise.any(...)";
+  };
+
+  return p;
+}
+
 // For convenience, functions as methods
 Promise.prototype = {
   map: function (f)
