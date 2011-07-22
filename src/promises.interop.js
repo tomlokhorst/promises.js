@@ -54,3 +54,29 @@ Promise.wait = function (ms) // Int -> Promise ()
   return p;
 };
 
+Promise.delay = function (ms, pa) // Int -> Promise a -> Promise a
+{
+  var d = new Deferred();
+
+  pa.onDone(function (val)
+  {
+    setTimeout(function ()
+    {
+      d.done(val);
+    }, ms);
+  });
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return pa.toString() + ".delay(ms)";
+  };
+
+  return p;
+};
+
+Promise.prototype.delay = function (ms)
+{
+  return Promise.delay(ms, this);
+};
+
