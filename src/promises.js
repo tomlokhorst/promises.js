@@ -1,3 +1,12 @@
+/*!
+ * promises.js
+ *
+ * Copyright (c) 2011, Tom Lokhorst
+ * Released under BSD licence, see LICENSE file.
+ */
+
+;
+
 // A deferred is a value that can be resolved at a later time.
 // The value can be observed via the promise object
 function Deferred()
