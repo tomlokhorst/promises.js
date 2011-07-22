@@ -22,12 +22,12 @@ function Deferred()
       throw new Error("Callback is not a function");
 
     doneCallbacks.push(cb);
-  }
+  };
 
   promise.isDone = function ()
   {
     return isDone;
-  }
+  };
 
   this.done = function (val)
   {
@@ -59,18 +59,18 @@ function Deferred()
         throw new Error("Callback is not a function");
 
       cb(value);
-    }
-  }
+    };
+  };
 
   this.promise = function ()
   {
     return promise;
-  }
+  };
 
   this.toString = function ()
   {
     return "Deferred";
-  }
+  };
 }
 
 // A promise is a value that may not be available yet.
@@ -80,7 +80,7 @@ function Promise()
   this.toString = function ()
   {
     return "Promise";
-  }
+  };
 }
 
 Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
@@ -116,7 +116,7 @@ Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
   };
 
   return p;
-}
+};
 
 Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
 {
@@ -137,7 +137,7 @@ Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
   };
 
   return d.promise();
-}
+};
 
 // For convenience, functions as methods
 Promise.prototype = {

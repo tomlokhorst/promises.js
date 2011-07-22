@@ -34,5 +34,5 @@ Promise.create = function (f) // (() -> a) -> Promise a
   };
 
   return p;
-}
+};
 
