@@ -181,11 +181,20 @@ Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
   if (!(pp instanceof Promise))
     throw new Error("First argument is not a Promise");
 
-  var d = new Deferred();
-
-  pp.onDone(function (pa)
+  var d = new Deferred(function ()
   {
-    pa.onDone(d.done);
+    var l2;
+    var l1 = pp.onDone(function (pa)
+    {
+      l2 = pa.onDone(d.done);
+    });
+
+    return function ()
+    {
+      l1.stop();
+      if (l2)
+        l2.stop();
+    }
   });
 
   var p = d.promise();
