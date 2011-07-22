@@ -208,23 +208,29 @@ Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
 
 Promise.create = function (f) // (() -> a) -> Promise a
 {
-  var d = new Deferred();
-
-  setTimeout(function ()
+  var d = new Deferred(function ()
   {
-    var x;
-    try
+    var timeoutId = setTimeout(function ()
     {
-      x = f();
-    }
-    catch (_)
-    {
-      // Promises don't have support for exceptions, yet
-      return;
-    }
+      var x;
+      try
+      {
+        x = f();
+      }
+      catch (_)
+      {
+        // Promises don't have support for exceptions, yet
+        return;
+      }
 
-    d.done(x);
-  }, 0);
+      d.done(x);
+    }, 0);
+
+    return function ()
+    {
+      clearTimeout(timeoutId);
+    }
+  });
 
   var p = d.promise();
   p.toString = function ()
@@ -237,12 +243,18 @@ Promise.create = function (f) // (() -> a) -> Promise a
 
 Promise.wait = function (ms) // Int -> Promise ()
 {
-  var d = new Deferred();
-
-  setTimeout(function ()
+  var d = new Deferred(function ()
   {
-    d.done();
-  }, ms);
+    var timeoutId = setTimeout(function ()
+    {
+      d.done();
+    }, ms);
+
+    return function ()
+    {
+      clearTimeout(timeoutId);
+    }
+  });
 
   var p = d.promise();
   p.toString = function ()
@@ -255,14 +267,20 @@ Promise.wait = function (ms) // Int -> Promise ()
 
 Promise.delay = function (ms, pa) // Int -> Promise a -> Promise a
 {
-  var d = new Deferred();
-
-  pa.onDone(function (val)
+  var d = new Deferred(function ()
   {
-    setTimeout(function ()
+    var l = pa.onDone(function (val)
     {
-      d.done(val);
-    }, ms);
+      setTimeout(function ()
+      {
+        d.done(val);
+      }, ms);
+    });
+
+    return function ()
+    {
+      l.stop();
+    };
   });
 
   var p = d.promise();
