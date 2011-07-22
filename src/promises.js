@@ -285,6 +285,37 @@ Promise.delay = function (ms, pa) // Int -> Promise a -> Promise a
   return p;
 };
 
+Promise.any = function (ps) // [Promise a] -> Promise a
+{
+  var d = new Deferred(function ()
+  {
+    var listeners = [];
+    var f = function (val)
+    {
+      for (var i = 0, l = listeners.length; i < l; i++)
+        listeners[i].stop();
+
+      d.done(val);
+    };
+
+    for (var i = 0, l = ps.length; i < l; i++)
+      listeners[i] = ps[i].onDone(f);
+
+    return function ()
+    {
+      for (var i = 0, l = listeners.length; i < l; i++)
+        listeners[i].stop();
+    }
+  });
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return "Promise.any(...)";
+  };
+
+  return p;
+}
 
 // For convenience, functions as methods
 Promise.prototype = {
