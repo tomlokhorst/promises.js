@@ -22,6 +22,22 @@ function Deferred()
       throw new Error("Callback is not a function");
 
     doneCallbacks.push(cb);
+
+    var l = new Listener()
+    l.stop = function ()
+    {
+      if (!doneCallbacks) return;
+
+      var ix = doneCallbacks.indexOf(cb);
+      if (ix > -1)
+        doneCallbacks.splice(ix, 1);
+    }
+    l.toString = function ()
+    {
+      return "Listener to [" + promise.toString() + "]";
+    };
+
+    return l;
   };
 
   promise.isDone = function ()
@@ -66,6 +82,15 @@ function Deferred()
       {
         // ignore exception, to be consistent with original onDone
       }
+
+      var l = new Listener();
+      l.stop = function () {} // already called back
+      l.toString = function ()
+      {
+        return "Listener to [" + promise.toString() + "]";
+      };
+
+      return l;
     };
   };
 
@@ -158,4 +183,10 @@ Promise.prototype = {
     return Promise.flatten(this);
   }
 };
+
+// Listener objects are returned by onDone and allow listeners to Promises to
+// stop listening.
+function Listener()
+{
+}
 
