@@ -243,18 +243,11 @@ Promise.create = function (f) // (() -> a) -> Promise a
 
 Promise.wait = function (ms) // Int -> Promise ()
 {
-  var d = new Deferred(function ()
+  var d = new Deferred();
+  setTimeout(function ()
   {
-    var timeoutId = setTimeout(function ()
-    {
-      d.done();
-    }, ms);
-
-    return function ()
-    {
-      clearTimeout(timeoutId);
-    }
-  });
+    d.done();
+  }, ms);
 
   var p = d.promise();
   p.toString = function ()
