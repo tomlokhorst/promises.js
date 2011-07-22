@@ -68,6 +68,10 @@ function Deferred()
 // Use onDone to get called back when value is available.
 function Promise()
 {
+  this.toString = function ()
+  {
+    return "Promise";
+  }
 }
 
 Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
@@ -96,7 +100,13 @@ Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
     d.done(x);
   });
 
-  return d.promise();
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return pa.toString() + ".map(f)";
+  };
+
+  return p;
 }
 
 // For convenience, functions as methods
