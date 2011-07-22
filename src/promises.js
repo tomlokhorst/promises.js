@@ -74,17 +74,23 @@ function Deferred()
       if (typeof cb !== "function")
         throw new Error("Callback is not a function");
 
-      try
+      var timeoutId = setTimeout(function ()
       {
-        cb(value);
-      }
-      catch (_)
-      {
-        // ignore exception, to be consistent with original onDone
-      }
+        try
+        {
+          cb(value);
+        }
+        catch (_)
+        {
+          // ignore exception, to be consistent with original onDone
+        }
+      }, 0);
 
       var l = new Listener();
-      l.stop = function () {} // already called back
+      l.stop = function ()
+      {
+        clearTimeout(timeoutId);
+      };
       l.toString = function ()
       {
         return "Listener to [" + promise.toString() + "]";
