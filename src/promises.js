@@ -121,6 +121,12 @@ function Promise()
   };
 }
 
+// Listener objects are returned by onDone and allow listeners to Promises to
+// stop listening.
+function Listener()
+{
+}
+
 Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
 {
   if (typeof f !== "function")
@@ -177,6 +183,75 @@ Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
   return d.promise();
 };
 
+Promise.create = function (f) // (() -> a) -> Promise a
+{
+  var d = new Deferred();
+
+  setTimeout(function ()
+  {
+    var x;
+    try
+    {
+      x = f();
+    }
+    catch (_)
+    {
+      // Promises don't have support for exceptions, yet
+      return;
+    }
+
+    d.done(x);
+  }, 0);
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return "Promise.create(f)";
+  };
+
+  return p;
+};
+
+Promise.wait = function (ms) // Int -> Promise ()
+{
+  var d = new Deferred();
+
+  setTimeout(function ()
+  {
+    d.done();
+  }, ms);
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return "Promise.wait(ms)";
+  };
+
+  return p;
+};
+
+Promise.delay = function (ms, pa) // Int -> Promise a -> Promise a
+{
+  var d = new Deferred();
+
+  pa.onDone(function (val)
+  {
+    setTimeout(function ()
+    {
+      d.done(val);
+    }, ms);
+  });
+
+  var p = d.promise();
+  p.toString = function ()
+  {
+    return pa.toString() + ".delay(ms)";
+  };
+
+  return p;
+};
+
+
 // For convenience, functions as methods
 Promise.prototype = {
   map: function (f)
@@ -187,12 +262,10 @@ Promise.prototype = {
   flatten: function ()
   {
     return Promise.flatten(this);
+  },
+
+  delay: function (ms)
+  {
+    return Promise.delay(ms, this);
   }
 };
-
-// Listener objects are returned by onDone and allow listeners to Promises to
-// stop listening.
-function Listener()
-{
-}
-
