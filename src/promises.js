@@ -152,7 +152,7 @@ Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
 
 Promise.flatten = function (pp) // Promise (Promise a) -> Promise a
 {
-  if (!(pa instanceof Promise))
+  if (!(pp instanceof Promise))
     throw new Error("First argument is not a Promise");
 
   var d = new Deferred();
