@@ -70,3 +70,40 @@ function Promise()
 {
 }
 
+Promise.map = function (f, pa) // (a -> b) -> Promise a -> Promise b
+{
+  if (typeof f !== "function")
+    throw new Error("First argument is not a function");
+
+  if (!(pa instanceof Promise))
+    throw new Error("Second argument is not a Promise");
+
+  var d = new Deferred();
+
+  pa.onDone(function (val)
+  {
+    var x;
+    try
+    {
+      x = f(val);
+    }
+    catch (_)
+    {
+      // Promises don't have support for exceptions, yet
+      return;
+    }
+
+    d.done(x);
+  });
+
+  return d.promise();
+}
+
+// For convenience, functions as methods
+Promise.prototype = {
+  map: function (f)
+  {
+    return Promise.map(f, this);
+  }
+};
+
