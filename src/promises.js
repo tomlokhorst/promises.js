@@ -58,7 +58,14 @@ function Deferred()
       if (typeof cb !== "function")
         throw new Error("Callback is not a function");
 
-      cb(value);
+      try
+      {
+        cb(value);
+      }
+      catch (_)
+      {
+        // ignore exception, to be consistent with original onDone
+      }
     };
   };
 
